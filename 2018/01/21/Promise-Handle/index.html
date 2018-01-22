@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="MJ&#39;s Web Log">
 <meta property="og:description" content="An experimental imperative pattern for creating and resolving promises inside an async JavaScript function. ExperimentWhen using the new async/await syntax in JavaScript, it is awkward to create and r">
 <meta property="og:locale" content="english">
-<meta property="og:updated_time" content="2018-01-22T04:35:17.261Z">
+<meta property="og:updated_time" content="2018-01-22T04:43:03.929Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Promise Handle">
 <meta name="twitter:description" content="An experimental imperative pattern for creating and resolving promises inside an async JavaScript function. ExperimentWhen using the new async/await syntax in JavaScript, it is awkward to create and r">
@@ -54,7 +54,7 @@
       </nav>
       <nav id="sub-nav">
         
-        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://majgis.github.io"></form>
@@ -90,9 +90,7 @@
 <p>Let’s create a definition for a new type of object that provides an<br>imperative interface for a Promise, without the need for defining a callback.</p>
 <p>We will call this new object a PromiseHandle.  An instance of this object will contain the following members:</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    promise, <span class="comment">// A field containing an instance of a Promise</span></div><div class="line">    reject,  <span class="comment">// A method for rejecting the Promise instance</span></div><div class="line">    resolve, <span class="comment">// A method for resolving the Promise instance</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li>Like new Promise((resolve, reject)=&gt;{}) except you have a handle to call resolve and reject outside the function</li>
-</ul>
+<p>A PromiseHandle is like <code>new Promise((resolve, reject)=&gt;{})</code>, except you have a handle to call resolve and reject outside the function.</p>
 <p>Next, let’s create a factory function that returns an instance of PromiseHandle.</p>
 <p>An example implementation of this factory function:</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">newPromiseHandle</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">const</span> handle = &#123;&#125;;</div><div class="line">  handle.promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</div><div class="line">    handle.resolve = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</div><div class="line">      resolve(value);</div><div class="line">      <span class="keyword">return</span> handle.promise;</div><div class="line">    &#125;;</div><div class="line">    handle.reject = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</div><div class="line">      reject(value);</div><div class="line">      <span class="keyword">return</span> handle.promise;</div><div class="line">    &#125;;</div><div class="line">  &#125;);</div><div class="line">  <span class="keyword">return</span> handle;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -108,9 +106,9 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://majgis.github.io/2018/01/21/Promise-Handle/" data-id="cjcppztr00002dvvkqei4ojqp" class="article-share-link">Delen</a>
+      <a data-url="https://majgis.github.io/2018/01/21/Promise-Handle/" data-id="cjcpq7q3p0002h3vk5su1h0h6" class="article-share-link">Share</a>
       
-        <a href="https://majgis.github.io/2018/01/21/Promise-Handle/#disqus_thread" class="article-comment-link">Commentaren</a>
+        <a href="https://majgis.github.io/2018/01/21/Promise-Handle/#disqus_thread" class="article-comment-link">Comments</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/catchify/">catchify</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/imperative/">imperative</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/">promise</a></li></ul>
@@ -123,7 +121,7 @@
   
   
     <a href="/2017/09/13/Create-Authorization-Basic-Header/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Ouder</strong>
+      <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">Create Authorization Basic Header</div>
     </a>
   
@@ -156,7 +154,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archieven</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
     </div>
@@ -166,7 +164,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recente berichten</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
