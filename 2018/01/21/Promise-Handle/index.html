@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Promise Handle | MJ&#39;s Web Log</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="An experimental imperative pattern for creating and resolving promises inside an async JavaScript function. ExperimentWhen using the new async/await syntax in JavaScript, it is awkward to create and r">
+<meta name="keywords" content="JavaScript,promise,catchify,imperative">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Promise Handle">
+<meta property="og:url" content="https://majgis.github.io/2018/01/21/Promise-Handle/index.html">
+<meta property="og:site_name" content="MJ&#39;s Web Log">
+<meta property="og:description" content="An experimental imperative pattern for creating and resolving promises inside an async JavaScript function. ExperimentWhen using the new async/await syntax in JavaScript, it is awkward to create and r">
+<meta property="og:locale" content="english">
+<meta property="og:updated_time" content="2018-01-22T04:35:17.261Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Promise Handle">
+<meta name="twitter:description" content="An experimental imperative pattern for creating and resolving promises inside an async JavaScript function. ExperimentWhen using the new async/await syntax in JavaScript, it is awkward to create and r">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MJ&#39;s Web Log</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/about.html">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://majgis.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Promise-Handle" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/21/Promise-Handle/" class="article-date">
+  <time datetime="2018-01-21T07:00:00.000Z" itemprop="datePublished">2018-01-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Promise Handle
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>An experimental imperative pattern for creating and resolving promises inside an async JavaScript function.</p>
+<h2 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h2><p>When using the new async/await syntax in JavaScript, it is awkward to create and return a Promise, other than the default.  We’re avoiding the use of callbacks with async/await but in corner cases where you need to create and resolve/reject a separate promise, it is awkward.</p>
+<p>Let’s create a definition for a new type of object that provides an<br>imperative interface for a Promise, without the need for defining a callback.</p>
+<p>We will call this new object a PromiseHandle.  An instance of this object will contain the following members:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    promise, <span class="comment">// A field containing an instance of a Promise</span></div><div class="line">    reject,  <span class="comment">// A method for rejecting the Promise instance</span></div><div class="line">    resolve, <span class="comment">// A method for resolving the Promise instance</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Like new Promise((resolve, reject)=&gt;{}) except you have a handle to call resolve and reject outside the function</li>
+</ul>
+<p>Next, let’s create a factory function that returns an instance of PromiseHandle.</p>
+<p>An example implementation of this factory function:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">newPromiseHandle</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">const</span> handle = &#123;&#125;;</div><div class="line">  handle.promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</div><div class="line">    handle.resolve = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</div><div class="line">      resolve(value);</div><div class="line">      <span class="keyword">return</span> handle.promise;</div><div class="line">    &#125;;</div><div class="line">    handle.reject = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</div><div class="line">      reject(value);</div><div class="line">      <span class="keyword">return</span> handle.promise;</div><div class="line">    &#125;;</div><div class="line">  &#125;);</div><div class="line">  <span class="keyword">return</span> handle;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>In this example, the resolve and reject methods will return instances of the promise instance as a convenience.</p>
+<p>Here is an example of basic usage:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> handle = newPromiseHandle();</div><div class="line"></div><div class="line"><span class="comment">// Access the promise</span></div><div class="line"><span class="keyword">let</span> pending = handle.promise;</div><div class="line"></div><div class="line"><span class="comment">// Reject the promise</span></div><div class="line">handle.reject(<span class="string">'rejected'</span>);</div><div class="line"></div><div class="line"><span class="comment">// Resolve the promise</span></div><div class="line">handle.resolve(<span class="string">'resolved'</span>);</div></pre></td></tr></table></figure>
+<p>Here is a more in depth example, showing how to return a single value obtained asynchronously despite multiple calls to the same method:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> pending = <span class="literal">null</span>;</div><div class="line"></div><div class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">example</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">if</span> (pending) <span class="keyword">return</span> pending;</div><div class="line"></div><div class="line">  <span class="keyword">const</span> handle = newPromiseHandle();</div><div class="line">  pending = handle.promise;</div><div class="line"></div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">    <span class="keyword">await</span> <span class="built_in">Promise</span>.resolve(<span class="string">'example'</span>);</div><div class="line">    handle.resolve(<span class="string">'resolved'</span>);</div><div class="line">  &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">    handle.reject(<span class="string">'rejected'</span>);</div><div class="line">  &#125;</div><div class="line">  pending = <span class="literal">null</span>;</div><div class="line">  <span class="keyword">return</span> handle.promise;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>It is important to keep in mind that an async function <a href="https://majgis.github.io/2017/09/08/js-async-always-new-promise/">always returns a new instance of a promise</a>.  In the last example, we are creating a new Promise instance with every <code>example()</code> call.  Each new Promise instance wraps the single Promise instance associated with our Promise handle.  It would be more efficient in this particular case to not use an async function.</p>
+<p>This pattern does eliminate the use of a callbacks when creating a promise inside an async function.</p>
+<p>The PromiseHandle factory described above is included in <a href="https://www.npmjs.com/package/catchify#catchifynewpromisehandle" target="_blank" rel="external">catchify</a>.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://majgis.github.io/2018/01/21/Promise-Handle/" data-id="cjcppztr00002dvvkqei4ojqp" class="article-share-link">Delen</a>
+      
+        <a href="https://majgis.github.io/2018/01/21/Promise-Handle/#disqus_thread" class="article-comment-link">Commentaren</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/catchify/">catchify</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/imperative/">imperative</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/">promise</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/09/13/Create-Authorization-Basic-Header/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ouder</strong>
+      <div class="article-nav-title">Create Authorization Basic Header</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/async/" style="font-size: 10px;">async</a> <a href="/tags/bash/" style="font-size: 10px;">bash</a> <a href="/tags/catchify/" style="font-size: 10px;">catchify</a> <a href="/tags/curl/" style="font-size: 10px;">curl</a> <a href="/tags/function/" style="font-size: 10px;">function</a> <a href="/tags/header/" style="font-size: 10px;">header</a> <a href="/tags/imperative/" style="font-size: 10px;">imperative</a> <a href="/tags/promise/" style="font-size: 20px;">promise</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/01/21/Promise-Handle/">Promise Handle</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/Create-Authorization-Basic-Header/">Create Authorization Basic Header</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/08/js-async-always-new-promise/">JS Async Always Returns New Promise</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Michael Jackson<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/about.html" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'majgis';
+  
+  var disqus_url = 'https://majgis.github.io/2018/01/21/Promise-Handle/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

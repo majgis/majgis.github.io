@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>JS Async Always Returns New Promise | MJ&#39;s Web Log</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="A JavaScript async function always returns a new promise, even if you immediately return a promise. Experimental Setup123456789$ node -v  v8.4.0$ lsb_release -aNo LSB modules are available.Distributor">
+<meta name="keywords" content="JavaScript,promise,async,function">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JS Async Always Returns New Promise">
+<meta property="og:url" content="https://majgis.github.io/2017/09/08/js-async-always-new-promise/index.html">
+<meta property="og:site_name" content="MJ&#39;s Web Log">
+<meta property="og:description" content="A JavaScript async function always returns a new promise, even if you immediately return a promise. Experimental Setup123456789$ node -v  v8.4.0$ lsb_release -aNo LSB modules are available.Distributor">
+<meta property="og:locale" content="english">
+<meta property="og:updated_time" content="2018-01-21T23:34:08.210Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JS Async Always Returns New Promise">
+<meta name="twitter:description" content="A JavaScript async function always returns a new promise, even if you immediately return a promise. Experimental Setup123456789$ node -v  v8.4.0$ lsb_release -aNo LSB modules are available.Distributor">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MJ&#39;s Web Log</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/about.html">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://majgis.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-js-async-always-new-promise" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/08/js-async-always-new-promise/" class="article-date">
+  <time datetime="2017-09-08T06:00:00.000Z" itemprop="datePublished">2017-09-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      JS Async Always Returns New Promise
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>A JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" target="_blank" rel="external">async function</a> always returns a new promise, even if you immediately return a promise.</p>
+<h2 id="Experimental-Setup"><a href="#Experimental-Setup" class="headerlink" title="Experimental Setup"></a>Experimental Setup</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$ node -v  </div><div class="line">v8.4.0</div><div class="line"></div><div class="line">$ lsb_release -a</div><div class="line">No LSB modules are available.</div><div class="line">Distributor ID:	Ubuntu</div><div class="line">Description:	Ubuntu 16.04.3 LTS</div><div class="line">Release:	16.04</div><div class="line">Codename:	xenial</div></pre></td></tr></table></figure>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="Confirm-that-a-new-promise-is-always-generated-by-an-async-function"><a href="#Confirm-that-a-new-promise-is-always-generated-by-an-async-function" class="headerlink" title="Confirm that a new promise is always generated by an async function"></a>Confirm that a new promise is always generated by an async function</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// test1.js</span></div><div class="line"><span class="keyword">const</span> promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve,reject</span>)=&gt;</span>resolve());</div><div class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>)</span>&#123;</div><div class="line">  <span class="keyword">return</span> promise;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="built_in">console</span>.log(test() !== test());</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ node test1.js</div><div class="line"><span class="literal">true</span></div></pre></td></tr></table></figure>
+<h3 id="Examine-the-behavior-of-the-resolve-function-passed-to-executor-function-of-a-new-promise"><a href="#Examine-the-behavior-of-the-resolve-function-passed-to-executor-function-of-a-new-promise" class="headerlink" title="Examine the behavior of the resolve function passed to executor function of a new promise"></a>Examine the behavior of the resolve function passed to executor function of a new promise</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// test2.js</span></div><div class="line"><span class="keyword">const</span> resolvedPromise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> resolve(<span class="string">'resolved'</span>));</div><div class="line"><span class="keyword">const</span> rejectedPromise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">_, reject</span>) =&gt;</span> reject(<span class="string">'rejected'</span>));</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">test2</span>(<span class="params">promise</span>)</span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</div><div class="line">    resolve(promise);</div><div class="line">  &#125;);</div><div class="line">&#125;</div><div class="line"></div><div class="line">test2(resolvedPromise).then(<span class="function"><span class="params">v</span> =&gt;</span> &#123;</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'resolvedPromise:'</span>, v); </div><div class="line">&#125;);</div><div class="line"></div><div class="line">test2(rejectedPromise).catch(<span class="function"><span class="params">v</span> =&gt;</span> &#123;</div><div class="line">   <span class="built_in">console</span>.log(<span class="string">'rejectedPromise:'</span>, v);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ node test2.js </div><div class="line">resolvedPromise: resolved</div><div class="line">rejectedPromise: rejected</div></pre></td></tr></table></figure>
+<h2 id="Take-Away"><a href="#Take-Away" class="headerlink" title="Take Away"></a>Take Away</h2><p>Working with an async function is equivalent to working within the executor of a new promise.</p>
+<p>The resolve function, the first argument of the promise executor, behaves the same as the return statement of an async<br>function.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve,reject</span>) =&gt;</span> &#123;</div><div class="line">    <span class="comment">// resolve === return</span></div><div class="line">    <span class="comment">// reject === throw</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" target="_blank" rel="external">MDN: async function</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="external">MDN: Promise</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://majgis.github.io/2017/09/08/js-async-always-new-promise/" data-id="cjcppztr30004dvvkx9vrsbkf" class="article-share-link">Delen</a>
+      
+        <a href="https://majgis.github.io/2017/09/08/js-async-always-new-promise/#disqus_thread" class="article-comment-link">Commentaren</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/async/">async</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/function/">function</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/">promise</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/09/13/Create-Authorization-Basic-Header/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Nieuwer</strong>
+      <div class="article-nav-title">
+        
+          Create Authorization Basic Header
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/async/" style="font-size: 10px;">async</a> <a href="/tags/bash/" style="font-size: 10px;">bash</a> <a href="/tags/catchify/" style="font-size: 10px;">catchify</a> <a href="/tags/curl/" style="font-size: 10px;">curl</a> <a href="/tags/function/" style="font-size: 10px;">function</a> <a href="/tags/header/" style="font-size: 10px;">header</a> <a href="/tags/imperative/" style="font-size: 10px;">imperative</a> <a href="/tags/promise/" style="font-size: 20px;">promise</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/01/21/Promise-Handle/">Promise Handle</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/Create-Authorization-Basic-Header/">Create Authorization Basic Header</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/08/js-async-always-new-promise/">JS Async Always Returns New Promise</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Michael Jackson<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/about.html" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'majgis';
+  
+  var disqus_url = 'https://majgis.github.io/2017/09/08/js-async-always-new-promise/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

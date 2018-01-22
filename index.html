@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>MJ&#39;s Web Log</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="MJ&#39;s Web Log">
+<meta property="og:url" content="https://majgis.github.io/index.html">
+<meta property="og:site_name" content="MJ&#39;s Web Log">
+<meta property="og:locale" content="english">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MJ&#39;s Web Log">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">MJ&#39;s Web Log</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/about.html">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://majgis.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-Promise-Handle" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/21/Promise-Handle/" class="article-date">
+  <time datetime="2018-01-21T07:00:00.000Z" itemprop="datePublished">2018-01-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/21/Promise-Handle/">Promise Handle</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>An experimental imperative pattern for creating and resolving promises inside an async JavaScript function.</p>
+<h2 id="Experiment"><a href="#Experiment" class="headerlink" title="Experiment"></a>Experiment</h2><p>When using the new async/await syntax in JavaScript, it is awkward to create and return a Promise, other than the default.  We’re avoiding the use of callbacks with async/await but in corner cases where you need to create and resolve/reject a separate promise, it is awkward.</p>
+<p>Let’s create a definition for a new type of object that provides an<br>imperative interface for a Promise, without the need for defining a callback.</p>
+<p>We will call this new object a PromiseHandle.  An instance of this object will contain the following members:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    promise, <span class="comment">// A field containing an instance of a Promise</span></div><div class="line">    reject,  <span class="comment">// A method for rejecting the Promise instance</span></div><div class="line">    resolve, <span class="comment">// A method for resolving the Promise instance</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Like new Promise((resolve, reject)=&gt;{}) except you have a handle to call resolve and reject outside the function</li>
+</ul>
+<p>Next, let’s create a factory function that returns an instance of PromiseHandle.</p>
+<p>An example implementation of this factory function:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">newPromiseHandle</span> (<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">const</span> handle = &#123;&#125;;</div><div class="line">  handle.promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</div><div class="line">    handle.resolve = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</div><div class="line">      resolve(value);</div><div class="line">      <span class="keyword">return</span> handle.promise;</div><div class="line">    &#125;;</div><div class="line">    handle.reject = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</div><div class="line">      reject(value);</div><div class="line">      <span class="keyword">return</span> handle.promise;</div><div class="line">    &#125;;</div><div class="line">  &#125;);</div><div class="line">  <span class="keyword">return</span> handle;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>In this example, the resolve and reject methods will return instances of the promise instance as a convenience.</p>
+<p>Here is an example of basic usage:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> handle = newPromiseHandle();</div><div class="line"></div><div class="line"><span class="comment">// Access the promise</span></div><div class="line"><span class="keyword">let</span> pending = handle.promise;</div><div class="line"></div><div class="line"><span class="comment">// Reject the promise</span></div><div class="line">handle.reject(<span class="string">'rejected'</span>);</div><div class="line"></div><div class="line"><span class="comment">// Resolve the promise</span></div><div class="line">handle.resolve(<span class="string">'resolved'</span>);</div></pre></td></tr></table></figure>
+<p>Here is a more in depth example, showing how to return a single value obtained asynchronously despite multiple calls to the same method:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> pending = <span class="literal">null</span>;</div><div class="line"></div><div class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">example</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">if</span> (pending) <span class="keyword">return</span> pending;</div><div class="line"></div><div class="line">  <span class="keyword">const</span> handle = newPromiseHandle();</div><div class="line">  pending = handle.promise;</div><div class="line"></div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">    <span class="keyword">await</span> <span class="built_in">Promise</span>.resolve(<span class="string">'example'</span>);</div><div class="line">    handle.resolve(<span class="string">'resolved'</span>);</div><div class="line">  &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">    handle.reject(<span class="string">'rejected'</span>);</div><div class="line">  &#125;</div><div class="line">  pending = <span class="literal">null</span>;</div><div class="line">  <span class="keyword">return</span> handle.promise;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>It is important to keep in mind that an async function <a href="https://majgis.github.io/2017/09/08/js-async-always-new-promise/">always returns a new instance of a promise</a>.  In the last example, we are creating a new Promise instance with every <code>example()</code> call.  Each new Promise instance wraps the single Promise instance associated with our Promise handle.  It would be more efficient in this particular case to not use an async function.</p>
+<p>This pattern does eliminate the use of a callbacks when creating a promise inside an async function.</p>
+<p>The PromiseHandle factory described above is included in <a href="https://www.npmjs.com/package/catchify#catchifynewpromisehandle" target="_blank" rel="external">catchify</a>.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://majgis.github.io/2018/01/21/Promise-Handle/" data-id="cjcppztr00002dvvkqei4ojqp" class="article-share-link">Delen</a>
+      
+        <a href="https://majgis.github.io/2018/01/21/Promise-Handle/#disqus_thread" class="article-comment-link">Commentaren</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/catchify/">catchify</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/imperative/">imperative</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/">promise</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Create-Authorization-Basic-Header" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/13/Create-Authorization-Basic-Header/" class="article-date">
+  <time datetime="2017-09-13T06:00:00.000Z" itemprop="datePublished">2017-09-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/13/Create-Authorization-Basic-Header/">Create Authorization Basic Header</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>The <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization" target="_blank" rel="external">HTTP Authorization request header</a> is sometimes required to authenticate a user agent with a server.<br>This post explains how to create the header on linux at command line.</p>
+<h2 id="Syntax"><a href="#Syntax" class="headerlink" title="Syntax"></a>Syntax</h2><p>The HTTP Authorization request header has the following syntax:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Authorization: &lt;type&gt; &lt;credentials&gt;</div></pre></td></tr></table></figure></p>
+<p>The type is typically <a href="https://tools.ietf.org/html/rfc7617" target="_blank" rel="external">“Basic”</a>, in which case the credentials are of the form <code>user:password</code> encoded as <a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base64</a>.</p>
+<p>Curl will generate this header for us if we use the <code>-u</code> option:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ curl -v -u user:password majgis.github.io     </div><div class="line">...</div><div class="line">&gt; Authorization: Basic dXNlcjpwYXNzd29yZA==</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<p>Now for the real question, how do we generate this header for use with curl’s <code>-H</code> option?</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>Here is the first attempt to base64 encode <code>user:password</code> that is WRONG:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># This is WRONG!</span></div><div class="line">$ <span class="built_in">echo</span> user:password | base64 </div><div class="line">dXNlcjpwYXNzd29yZAo=</div></pre></td></tr></table></figure></p>
+<p>Notice that <code>dXNlcjpwYXNzd29yZAo=</code> does not equal <code>dXNlcjpwYXNzd29yZA==</code>.</p>
+<p>Let’s decode to find the difference:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">echo</span> dXNlcjpwYXNzd29yZAo= | base64 -d</div><div class="line">user:password</div><div class="line"></div><div class="line">$ <span class="built_in">echo</span> dXNlcjpwYXNzd29yZA== | base64 -d</div><div class="line">user:password%</div></pre></td></tr></table></figure></p>
+<p>That <code>%</code> is different.  What is that?  </p>
+<p>The <code>%</code> symbol is <a href="http://zsh.sourceforge.net/Doc/Release/Options.html#Prompting" target="_blank" rel="external">how zsh handles the end of partial lines</a>.<br>In other words, zsh assumes we want our prompt on a newline even if the last command didn’t end with<br>a newline. That <code>%</code> symbol is how we know the difference between a newline the last command output<br>and a newline zsh graciously inserted for us.  </p>
+<p>Let’s execute this command under bash and see the difference:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bash</div><div class="line">$ <span class="built_in">echo</span> dXNlcjpwYXNzd29yZAo= | base64 -d</div><div class="line">user:password</div><div class="line"></div><div class="line">$ <span class="built_in">echo</span> dXNlcjpwYXNzd29yZA== | base64 -d</div><div class="line">user:password$</div></pre></td></tr></table></figure>
+<p>The base64 encoded <code>user:password</code> that curl generated is not terminated with a newline, unlike the one we generated.</p>
+<p>Let’s see if we can get <code>echo</code> to not add that newline.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ man <span class="built_in">echo</span> | cat | grep <span class="string">'newline'</span> </div><div class="line">       -n     <span class="keyword">do</span> not output the trailing newline</div></pre></td></tr></table></figure>
+<p>The <code>-n</code> option for <code>echo</code> is what we want.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">echo</span> -n user:password | base64</div><div class="line">dXNlcjpwYXNzd29yZA==</div></pre></td></tr></table></figure></p>
+<p>We see that the output is exactly the same as what curl generated.</p>
+<p>Putting it all together:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ curl -v -H <span class="string">"Authorization: Basic `echo -n user:password | base64`"</span> majgis.github.io</div><div class="line">...</div><div class="line">&gt; Authorization: Basic dXNlcjpwYXNzd29yZA==</div><div class="line">...</div></pre></td></tr></table></figure>
+<h2 id="Take-Away"><a href="#Take-Away" class="headerlink" title="Take Away"></a>Take Away</h2><p>In zsh, a <code>%</code> symbol is placed at the end of a line where zsh inserted a newline for us.</p>
+<p>It is important to include echo’s <code>-n</code> option when piping content to an encoder to avoid a<br>newline character being included in the encoded output.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">echo</span> -n user:password | base64</div></pre></td></tr></table></figure>
+<h2 id="Experimental-Setup"><a href="#Experimental-Setup" class="headerlink" title="Experimental Setup"></a>Experimental Setup</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">echo</span> &amp;&amp; curl --version &amp;&amp; <span class="built_in">echo</span> &amp;&amp; lsb_release -d -c &amp;&amp; <span class="built_in">echo</span> &amp;&amp; <span class="built_in">echo</span> <span class="variable">$0</span> &amp;&amp; zsh --version</div><div class="line"></div><div class="line">curl 7.52.1 (x86_64-pc-linux-gnu) libcurl/7.52.1 OpenSSL/1.0.2g zlib/1.2.11 libidn2/0.16 libpsl/0.17.0 (+libidn2/0.16) librtmp/2.3</div><div class="line">Protocols: dict file ftp ftps gopher http https imap imaps ldap ldaps pop3 pop3s rtmp rtsp smb smbs smtp smtps telnet tftp </div><div class="line">Features: AsynchDNS IDN IPv6 Largefile GSS-API Kerberos SPNEGO NTLM NTLM_WB SSL libz TLS-SRP UnixSockets HTTPS-proxy PSL </div><div class="line"></div><div class="line">Description:    Ubuntu 17.04</div><div class="line">Codename:       zesty</div><div class="line"></div><div class="line">/usr/bin/zsh</div><div class="line">zsh 5.2 (x86_64-ubuntu-linux-gnu)</div></pre></td></tr></table></figure>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization" target="_blank" rel="external">MDN - HTTP/Headers/Authorization</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">Wikipedia - base64</a></li>
+<li><a href="http://zsh.sourceforge.net/Doc/Release/Options.html#Prompting" target="_blank" rel="external">The Z Shell Manual - Prompting</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Basic_authentication_scheme" target="_blank" rel="external">MDN - HTTP/Authentication: Basic authentication scheme</a></li>
+<li><a href="https://tools.ietf.org/html/rfc7617" target="_blank" rel="external">RFC7617 - The ‘Basic’ HTTP Authentication Scheme</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://majgis.github.io/2017/09/13/Create-Authorization-Basic-Header/" data-id="cjcppztqv0001dvvk32fuaolb" class="article-share-link">Delen</a>
+      
+        <a href="https://majgis.github.io/2017/09/13/Create-Authorization-Basic-Header/#disqus_thread" class="article-comment-link">Commentaren</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bash/">bash</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/curl/">curl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/header/">header</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-js-async-always-new-promise" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/09/08/js-async-always-new-promise/" class="article-date">
+  <time datetime="2017-09-08T06:00:00.000Z" itemprop="datePublished">2017-09-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/08/js-async-always-new-promise/">JS Async Always Returns New Promise</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>A JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" target="_blank" rel="external">async function</a> always returns a new promise, even if you immediately return a promise.</p>
+<h2 id="Experimental-Setup"><a href="#Experimental-Setup" class="headerlink" title="Experimental Setup"></a>Experimental Setup</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$ node -v  </div><div class="line">v8.4.0</div><div class="line"></div><div class="line">$ lsb_release -a</div><div class="line">No LSB modules are available.</div><div class="line">Distributor ID:	Ubuntu</div><div class="line">Description:	Ubuntu 16.04.3 LTS</div><div class="line">Release:	16.04</div><div class="line">Codename:	xenial</div></pre></td></tr></table></figure>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="Confirm-that-a-new-promise-is-always-generated-by-an-async-function"><a href="#Confirm-that-a-new-promise-is-always-generated-by-an-async-function" class="headerlink" title="Confirm that a new promise is always generated by an async function"></a>Confirm that a new promise is always generated by an async function</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// test1.js</span></div><div class="line"><span class="keyword">const</span> promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve,reject</span>)=&gt;</span>resolve());</div><div class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>)</span>&#123;</div><div class="line">  <span class="keyword">return</span> promise;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="built_in">console</span>.log(test() !== test());</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ node test1.js</div><div class="line"><span class="literal">true</span></div></pre></td></tr></table></figure>
+<h3 id="Examine-the-behavior-of-the-resolve-function-passed-to-executor-function-of-a-new-promise"><a href="#Examine-the-behavior-of-the-resolve-function-passed-to-executor-function-of-a-new-promise" class="headerlink" title="Examine the behavior of the resolve function passed to executor function of a new promise"></a>Examine the behavior of the resolve function passed to executor function of a new promise</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// test2.js</span></div><div class="line"><span class="keyword">const</span> resolvedPromise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> resolve(<span class="string">'resolved'</span>));</div><div class="line"><span class="keyword">const</span> rejectedPromise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">_, reject</span>) =&gt;</span> reject(<span class="string">'rejected'</span>));</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">test2</span>(<span class="params">promise</span>)</span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</div><div class="line">    resolve(promise);</div><div class="line">  &#125;);</div><div class="line">&#125;</div><div class="line"></div><div class="line">test2(resolvedPromise).then(<span class="function"><span class="params">v</span> =&gt;</span> &#123;</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'resolvedPromise:'</span>, v); </div><div class="line">&#125;);</div><div class="line"></div><div class="line">test2(rejectedPromise).catch(<span class="function"><span class="params">v</span> =&gt;</span> &#123;</div><div class="line">   <span class="built_in">console</span>.log(<span class="string">'rejectedPromise:'</span>, v);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ node test2.js </div><div class="line">resolvedPromise: resolved</div><div class="line">rejectedPromise: rejected</div></pre></td></tr></table></figure>
+<h2 id="Take-Away"><a href="#Take-Away" class="headerlink" title="Take Away"></a>Take Away</h2><p>Working with an async function is equivalent to working within the executor of a new promise.</p>
+<p>The resolve function, the first argument of the promise executor, behaves the same as the return statement of an async<br>function.</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve,reject</span>) =&gt;</span> &#123;</div><div class="line">    <span class="comment">// resolve === return</span></div><div class="line">    <span class="comment">// reject === throw</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function" target="_blank" rel="external">MDN: async function</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="external">MDN: Promise</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://majgis.github.io/2017/09/08/js-async-always-new-promise/" data-id="cjcppztr30004dvvkx9vrsbkf" class="article-share-link">Delen</a>
+      
+        <a href="https://majgis.github.io/2017/09/08/js-async-always-new-promise/#disqus_thread" class="article-comment-link">Commentaren</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/async/">async</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/function/">function</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/">promise</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/async/" style="font-size: 10px;">async</a> <a href="/tags/bash/" style="font-size: 10px;">bash</a> <a href="/tags/catchify/" style="font-size: 10px;">catchify</a> <a href="/tags/curl/" style="font-size: 10px;">curl</a> <a href="/tags/function/" style="font-size: 10px;">function</a> <a href="/tags/header/" style="font-size: 10px;">header</a> <a href="/tags/imperative/" style="font-size: 10px;">imperative</a> <a href="/tags/promise/" style="font-size: 20px;">promise</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archieven</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recente berichten</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/01/21/Promise-Handle/">Promise Handle</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/13/Create-Authorization-Basic-Header/">Create Authorization Basic Header</a>
+          </li>
+        
+          <li>
+            <a href="/2017/09/08/js-async-always-new-promise/">JS Async Always Returns New Promise</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Michael Jackson<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/about.html" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'majgis';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
